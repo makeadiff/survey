@@ -1,6 +1,7 @@
 <?php
 require('common.php');
 $survey_id = $sql->getOne("SELECT MAX(id) FROM Survey WHERE status='1'"); //get_cycle();
+$survey = $sql->getAssoc("SELECT * FROM Survey WHERE id=$survey_id");
 
 if(!$survey_id) {
 	render("closed.php");
@@ -23,6 +24,7 @@ if(empty($QUERY['vol'])) {
 }
 
 $user = $sql->from("User")->find($user_id);
-$questions = $sql->from("SurveyQuestion")->where(array('status' => '1', 'survey_id' => $survey_id))->get();
+$questions = $sql->from("SurveyQuestion")->where(array('status' => '1', 'survey_id' => $survey_id))->sort("sort_order")->get('byid');
+$responses = $sql->getById("SELECT question_id, answer FROM SurveyResponse WHERE user_id=$user_id AND question_id IN (" . implode(",", array_keys($questions)) . ")");
 
 render();
